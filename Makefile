@@ -1,4 +1,4 @@
-.PHONY: install setup start stop clean help status
+.PHONY: install setup start stop clean help status pack-dxt setup-dev test-full
 
 # Configuration variables - override with make VAR=value if needed
 MCP_DIR = ./mcp-cli
@@ -11,7 +11,7 @@ CONFIG_FILE = server_config.json
 MCP_SERVER_NAME = local-server
 
 help:
-	@echo "MCP CLI with Ollama Setup"
+	@echo "MCP Server Template with Desktop Extension Support"
 	@echo "Configuration:"
 	@echo "  Model: $(OLLAMA_MODEL_DISPLAY)"
 	@echo "  Provider: $(LLM_PROVIDER)"
@@ -19,13 +19,19 @@ help:
 	@echo "  MCP Directory: $(MCP_DIR)"
 	@echo ""
 	@echo "Available targets:"
-	@echo "  install    - Install mcp-cli and dependencies"
-	@echo "  setup      - Setup Ollama and pull $(OLLAMA_MODEL_DISPLAY) model"
-	@echo "  start      - Start mcp-cli with Ollama and $(OLLAMA_MODEL_DISPLAY)"
-	@echo "  stop       - Stop Ollama service"
-	@echo "  status     - Show status of Ollama and model"
-	@echo "  clean      - Clean up temporary files and directories"
-	@echo "  help       - Show this help message"
+	@echo "  install      - Install mcp-cli and dependencies"
+	@echo "  setup        - Setup Ollama and pull $(OLLAMA_MODEL_DISPLAY) model"
+	@echo "  start        - Start mcp-cli with Ollama and $(OLLAMA_MODEL_DISPLAY)"
+	@echo "  stop         - Stop Ollama service"
+	@echo "  status       - Show status of Ollama and model"
+	@echo "  clean        - Clean up temporary files and directories"
+	@echo ""
+	@echo "Desktop Extension targets:"
+	@echo "  pack-dxt     - Build DXT extension file"
+	@echo "  setup-dev    - Install development dependencies and pre-commit hooks"
+	@echo "  test-full    - Run all tests including extension validation"
+	@echo ""
+	@echo "  help         - Show this help message"
 	@echo ""
 	@echo "Example: make OLLAMA_MODEL=llama3:8b setup"
 
@@ -48,7 +54,7 @@ install:
 	@echo '  "mcpServers": {' >> $(MCP_DIR)/$(CONFIG_FILE)
 	@echo '    "$(MCP_SERVER_NAME)": {' >> $(MCP_DIR)/$(CONFIG_FILE)
 	@echo '      "command": "../.venv/bin/python",' >> $(MCP_DIR)/$(CONFIG_FILE)
-	@echo '      "args": ["../main.py"],' >> $(MCP_DIR)/$(CONFIG_FILE)
+	@echo '      "args": ["../server/main.py"],' >> $(MCP_DIR)/$(CONFIG_FILE)
 	@echo '      "env": {}' >> $(MCP_DIR)/$(CONFIG_FILE)
 	@echo '    }' >> $(MCP_DIR)/$(CONFIG_FILE)
 	@echo '  }' >> $(MCP_DIR)/$(CONFIG_FILE)
@@ -107,3 +113,38 @@ clean:
 	@echo "Cleanup complete"
 
 all: setup start
+
+# Desktop Extension Development Targets
+pack-dxt:
+	@echo "Building DXT extension..."
+	@which node > /dev/null || (echo "Node.js is required to pack DXT extensions" && exit 1)
+	@which uv > /dev/null || (echo "uv is required to generate requirements.txt" && exit 1)
+	@echo "Ensuring required files exist..."
+	@test -f manifest.json || (echo "manifest.json not found" && exit 1)
+	@test -f server/main.py || (echo "server/main.py not found" && exit 1)
+	@test -f icon.png || (echo "icon.png not found" && exit 1)
+	@echo "Generating requirements.txt from uv.lock..."
+	uv export --no-hashes --format requirements-txt > requirements.txt
+	npx @anthropic-ai/dxt pack
+	@echo "Cleaning up generated requirements.txt..."
+	@rm -f requirements.txt
+	@echo "DXT extension built successfully"
+
+setup-dev:
+	@echo "Setting up development environment..."
+	@which uv > /dev/null || (echo "Please install uv first: https://docs.astral.sh/uv/getting-started/installation/" && exit 1)
+	uv sync --dev
+	@echo "Installing pre-commit hooks..."
+	uv run pre-commit install
+	@echo "Development environment setup complete"
+
+test-full:
+	@echo "Running comprehensive test suite..."
+	@which uv > /dev/null || (echo "Please install uv first and run 'make setup-dev'" && exit 1)
+	@echo "Running pytest..."
+	uv run pytest
+	@echo "Validating manifest.json..."
+	python -c "import json; json.load(open('manifest.json'))"
+	@echo "Testing DXT pack (dry run)..."
+	@which node > /dev/null && npx @anthropic-ai/dxt pack --dry-run || echo "Node.js not available, skipping DXT validation"
+	@echo "All tests passed"

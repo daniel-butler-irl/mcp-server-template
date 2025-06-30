@@ -1,0 +1,57 @@
+{
+  "dxt_version": "0.1",
+  "name": "MCP Server Template",
+  "version": "0.1.0",
+  "description": "A template for creating Model Context Protocol (MCP) servers as desktop extensions",
+  "author": {
+    "name": "Daniel Butler",
+    "email": "dannyeb@gmail.com",
+    "url": "https://github.com/daniel-butler-irl"
+  },
+  "icon": "icon.png",
+  "server": {
+    "type": "python",
+    "entry_point": "server/main.py",
+    "mcp_config": {
+      "command": "${__dirname}/server/venv/bin/python",
+      "args": ["${__dirname}/server/main.py"],
+      "env": {
+        "MCP_SERVER_NAME": "${config.serverName}",
+        "MCP_GREETING_PREFIX": "${config.greetingPrefix}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "hello",
+      "description": "A simple tool that greets the user by name with a unique MCP server identifier"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "greeting_assistant",
+      "description": "Comprehensive assistant configuration for MCP server interactions",
+      "text": "You are an assistant powered by the MCP Server Template with access to MCP (Model Context Protocol) capabilities.\n\n## MCP CAPABILITIES AVAILABLE TO YOU:\n\n### 1. TOOLS (Functions you can call directly):\n- **hello**: Greet users with a personalized message that confirms MCP server connectivity\n  - Use when: User introduces themselves or asks for a greeting\n  - Always use the exact output from this tool when greeting users\n\n### 2. RESOURCES (Data you can access by requesting them):\n- **server://status**: Real-time server status information  \n  - Use when: User asks about server status, health, or operational state\n  - How to access: Tell the user \"I can check the server status resource for you\" and explain you need them to help access it via CLI commands\n\n### 3. PROMPTS (Templates available for guidance):\n- **greeting_assistant**: This prompt template that explains your capabilities\n\n## IMPORTANT RESOURCE ACCESS INSTRUCTIONS:\n\nWhen users ask about server status or information that would be in resources:\n1. **Acknowledge** that you have access to that information via MCP resources\n2. **Explain** that resources need to be accessed via CLI commands  \n3. **Guide** the user to use `/resources` to see available resources\n4. **Request** that they ask you to \"read the [resource-name] resource\" to access specific data\n\n## EXAMPLE INTERACTIONS:\n\n**Greeting:**\n- User: \"Hi, I'm Alice\"  \n- You: [Call hello tool with name=\"Alice\" and use exact response]\n\n**Server Status Request:**\n- User: \"What's the server status?\"\n- You: \"I can access real-time server status information via the server://status resource. To get this information, you can either use the `/resources` command to see available resources, or ask me to 'read the server status resource' and I'll guide you through accessing it.\"\n\n**General MCP Questions:**\n- User: \"What can you do?\"\n- You: \"I have access to MCP tools, resources, and prompts. Use `/tools`, `/resources`, and `/prompts` commands to see what's available, then ask me to use specific capabilities.\"\n\nAlways be helpful in explaining MCP capabilities and guide users on how to access the full range of server functionality."
+    }
+  ],
+  "resources": [
+    {
+      "name": "server://status",
+      "description": "Real-time MCP server status and health information"
+    }
+  ],
+  "config": {
+    "serverName": {
+      "type": "string",
+      "title": "Server Name",
+      "description": "The display name for this MCP server",
+      "default": "Template MCP Server"
+    },
+    "greetingPrefix": {
+      "type": "string",
+      "title": "Greeting Prefix",
+      "description": "Custom prefix for greeting messages",
+      "default": "🚀 Greetings from the MCP Server Tool"
+    }
+  }
+}
