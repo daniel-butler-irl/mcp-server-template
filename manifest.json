@@ -14,7 +14,9 @@
     "entry_point": "server/main.py",
     "mcp_config": {
       "command": "python3",
-      "args": ["${__dirname}/server/main.py"],
+      "args": [
+        "${__dirname}/server/main.py"
+      ],
       "env": {
         "MCP_SERVER_NAME": "${config.serverName}",
         "MCP_GREETING_PREFIX": "${config.greetingPrefix}"
@@ -51,7 +53,7 @@
       "type": "string",
       "title": "Greeting Prefix",
       "description": "Custom prefix for greeting messages",
-      "default": "🚀 Greetings from the MCP Server Tool"
+      "default": "\ud83d\ude80 Greetings from the MCP Server Tool"
     }
   }
 }
