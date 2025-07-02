@@ -1,7 +1,7 @@
 {
   "dxt_version": "0.1",
   "name": "MCP Server Template",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A template for creating Model Context Protocol (MCP) servers as desktop extensions",
   "author": {
     "name": "Daniel Butler",
