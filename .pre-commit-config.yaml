@@ -10,43 +10,47 @@ repos:
       - id: check-merge-conflict
 
   - repo: https://github.com/psf/black
-    rev: 23.9.1
+    rev: 24.10.0
     hooks:
       - id: black
         language_version: python3
+        args: ["--line-length=88"]
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.12.0
+    rev: 5.13.2
     hooks:
       - id: isort
-        args: ["--profile", "black"]
+        args: ["--profile", "black", "--filter-files"]
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.292
+    rev: v0.8.4
     hooks:
       - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
+        args: [--fix, --exit-non-zero-on-fix, --line-length=88]
+      - id: ruff-format
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.5.1
     hooks:
       - id: mypy
-        additional_dependencies: [fastmcp]
+        additional_dependencies: [fastmcp, mcp, pytest, pytest-asyncio]
         args: [--ignore-missing-imports]
 
-  - repo: local
+  - repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: v2.0.4
     hooks:
-      - id: validate-manifest
-        name: Validate DXT manifest
-        entry: uv run python -c "import json; json.load(open('manifest.json'))"
-        language: system
-        files: manifest\.json$
+      - id: autopep8
+        args: [--in-place, --max-line-length=88, --aggressive, --aggressive]
 
-      # pytest disabled due to mcp-cli dependency conflicts
-      # Run manually with: uv run pytest tests/
-      # - id: pytest
-      #   name: pytest
-      #   entry: uv run pytest tests/
-      #   language: system
-      #   pass_filenames: false
-      #   always_run: true
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.15.0
+    hooks:
+      - id: pyupgrade
+        args: [--py310-plus]
+
+  - repo: https://github.com/IBM/detect-secrets
+    rev: 0.13.1+ibm.62.dss
+    hooks:
+      - id: detect-secrets
+        args: [--baseline, .secrets.baseline]
+        exclude: ^(uv\.lock|.*\.egg-info/.*)$

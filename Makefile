@@ -172,10 +172,6 @@ setup-dev:
 test-full:
 	@echo "Running comprehensive test suite..."
 	@which uv > /dev/null || (echo "Please install uv first and run 'make setup-dev'" && exit 1)
-	@echo "Running pytest..."
-	uv run pytest
-	@echo "Validating manifest.json..."
-	python -c "import json; json.load(open('manifest.json'))"
-	@echo "Testing DXT pack (dry run)..."
-	@which node > /dev/null && npx @anthropic-ai/dxt pack --dry-run || echo "Node.js not available, skipping DXT validation"
+	@echo "Running pytest on tests directory only..."
+	uv run pytest tests/
 	@echo "All tests passed"

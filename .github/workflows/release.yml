@@ -42,16 +42,16 @@ jobs:
         # Simple version bumping - patch version
         CURRENT_VERSION=$(python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
         echo "Current version: $CURRENT_VERSION"
-        
+
         # Split version and increment patch
         IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
         MAJOR=${VERSION_PARTS[0]}
         MINOR=${VERSION_PARTS[1]}
         PATCH=${VERSION_PARTS[2]}
-        
+
         NEW_PATCH=$((PATCH + 1))
         NEW_VERSION="$MAJOR.$MINOR.$NEW_PATCH"
-        
+
         echo "New version: $NEW_VERSION"
         echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
 
@@ -69,7 +69,7 @@ jobs:
         with open('manifest.json', 'w') as f:
             json.dump(manifest, f, indent=2)
         "
-        
+
     - name: Ensure icon exists
       run: |
         if [ ! -f icon.png ]; then
@@ -100,10 +100,10 @@ jobs:
         release_name: Release v${{ steps.version.outputs.version }}
         body: |
           Automated release v${{ steps.version.outputs.version }}
-          
+
           ## Changes
           - Automatic version bump and DXT extension build
-          
+
           ## Installation
           Download the `.dxt` file and install it in Claude Desktop.
         draft: false
