@@ -1,5 +1,8 @@
 .PHONY: install setup start stop clean help status pack-dxt setup-dev test-full
 
+# Default target - sets up development environment
+.DEFAULT_GOAL := setup-dev
+
 # Configuration variables - override with make VAR=value if needed
 MCP_DIR = ./mcp-cli
 OLLAMA_MODEL = granite3.3:2b
@@ -12,13 +15,21 @@ MCP_SERVER_NAME = local-server
 
 help:
 	@echo "MCP Server Template with Desktop Extension Support"
+	@echo ""
+	@echo "Quick Start:"
+	@echo "  make         - Setup development environment (recommended first step)"
+	@echo ""
 	@echo "Configuration:"
 	@echo "  Model: $(OLLAMA_MODEL_DISPLAY)"
 	@echo "  Provider: $(LLM_PROVIDER)"
 	@echo "  MCP Server: $(MCP_SERVER_NAME)"
 	@echo "  MCP Directory: $(MCP_DIR)"
 	@echo ""
-	@echo "Available targets:"
+	@echo "Development targets:"
+	@echo "  setup-dev    - Install development dependencies and pre-commit hooks"
+	@echo "  test-full    - Run all tests including extension validation"
+	@echo ""
+	@echo "MCP CLI targets:"
 	@echo "  install      - Install mcp-cli and dependencies"
 	@echo "  setup        - Setup Ollama and pull $(OLLAMA_MODEL_DISPLAY) model"
 	@echo "  start        - Start mcp-cli with Ollama and $(OLLAMA_MODEL_DISPLAY)"
@@ -28,8 +39,6 @@ help:
 	@echo ""
 	@echo "Desktop Extension targets:"
 	@echo "  pack-dxt     - Build DXT extension file"
-	@echo "  setup-dev    - Install development dependencies and pre-commit hooks"
-	@echo "  test-full    - Run all tests including extension validation"
 	@echo ""
 	@echo "  help         - Show this help message"
 	@echo ""
@@ -112,23 +121,30 @@ clean:
 	@pkill ollama || true
 	@echo "Cleanup complete"
 
-all: setup start
+# Default target - sets up development environment
+all: setup-dev
 
 # Desktop Extension Development Targets
 pack-dxt:
 	@echo "Building DXT extension..."
 	@which node > /dev/null || (echo "Node.js is required to pack DXT extensions" && exit 1)
 	@which uv > /dev/null || (echo "uv is required to generate requirements.txt" && exit 1)
+	@echo "Removing old DXT files..."
+	@rm -f *.dxt
 	@echo "Ensuring required files exist..."
 	@test -f manifest.json || (echo "manifest.json not found" && exit 1)
 	@test -f server/main.py || (echo "server/main.py not found" && exit 1)
 	@test -f icon.png || (echo "icon.png not found" && exit 1)
+	@echo "Ensuring virtual environment exists..."
+	@test -f .venv/bin/python || (echo "Virtual environment not found. Run 'uv sync' first." && exit 1)
 	@echo "Generating requirements.txt from uv.lock..."
 	uv export --no-hashes --format requirements-txt > requirements.txt
+	@echo "Packing DXT extension..."
 	npx @anthropic-ai/dxt pack
-	@echo "Cleaning up generated requirements.txt..."
+	@echo "Cleaning up generated files..."
 	@rm -f requirements.txt
 	@echo "DXT extension built successfully"
+
 
 setup-dev:
 	@echo "Setting up development environment..."

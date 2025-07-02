@@ -1,7 +1,8 @@
 # MCP Server Template
 
-> ⚠️ **Work in Progress** ⚠️  
-> The DXT format is new and I am still figuring it out. Expect changes and improvements!
+> ⚠️ **Desktop Extensions (DXT) Notice** ⚠️
+> Python DXT extensions currently have significant reliability issues. See [DXT_ISSUES.md](./DXT_ISSUES.md) for details.
+> **Recommendation**: Use traditional MCP server installation instead of DXT packaging.
 
 A template repository for creating Model Context Protocol (MCP) servers using Python and FastMCP.
 
@@ -31,8 +32,25 @@ The Model Context Protocol (MCP) is an open standard that enables AI assistants 
 
 ## Installation
 
-### Using uv (recommended)
+### Quick Start (Recommended)
 
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd mcp-server-template
+
+# Setup development environment (installs dependencies and pre-commit hooks)
+make
+```
+
+This will automatically:
+- Install dependencies using uv
+- Setup pre-commit hooks for code quality
+- Prepare the development environment
+
+### Manual Installation
+
+#### Using uv
 ```bash
 # Clone the repository
 git clone <your-repo-url>
@@ -40,10 +58,12 @@ cd mcp-server-template
 
 # Install dependencies
 uv sync
+
+# Setup development environment
+make setup-dev
 ```
 
-### Using pip
-
+#### Using pip
 ```bash
 # Clone the repository
 git clone <your-repo-url>
@@ -55,6 +75,9 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -e .
+
+# Setup development environment
+make setup-dev
 ```
 
 ## Usage
@@ -69,6 +92,10 @@ The server will start and listen for MCP protocol messages via stdin/stdout.
 
 ### Desktop Extension Installation
 
+> ⚠️ **Not Currently Recommended**: Python DXT extensions have known reliability issues. Use traditional MCP installation instead.
+
+**For future use when DXT is stable:**
+
 1. **Build the extension:**
    ```bash
    make pack-dxt
@@ -78,6 +105,10 @@ The server will start and listen for MCP protocol messages via stdin/stdout.
    - Open Claude Desktop
    - Go to Settings > Extensions
    - Click "Install Extension" and select the generated `.dxt` file
+
+**Current recommended approach:**
+- Use manual MCP server configuration in Claude Desktop's `claude_desktop_config.json`
+- See [MCP documentation](https://modelcontextprotocol.io/) for setup instructions
 
 ### Testing with MCP CLI
 
@@ -108,7 +139,7 @@ You can test the server using the MCP CLI tools included in this repository. Her
 🚀 Greetings from the MCP Server Tool, Alice! This is your unique confirmation that the Model Context Protocol server is actively responding to your request. ✨
 ```
 
-#### Resource Example  
+#### Resource Example
 **Step 1 - Check available resources:**
 ```bash
 > /resources
@@ -151,7 +182,7 @@ I have access to MCP tools, resources, and prompts. Use `/tools`, `/resources`, 
 
 MCP CAPABILITIES AVAILABLE:
 - TOOLS: Functions I can call directly (like 'hello' for greetings)
-- RESOURCES: Data I can access (like 'server://status' for server information)  
+- RESOURCES: Data I can access (like 'server://status' for server information)
 - PROMPTS: Templates for guidance (like this assistant configuration)
 ```
 
@@ -221,11 +252,11 @@ To add new tools to your MCP server, follow this pattern:
 async def your_tool_name(param1: str, param2: int) -> str:
     """
     Description of your tool.
-    
+
     Args:
         param1: Description of parameter 1
         param2: Description of parameter 2
-    
+
     Returns:
         str: Description of return value
     """
@@ -257,7 +288,7 @@ The extension can be configured through `manifest.json`:
       "default": "Template MCP Server"
     },
     "greetingPrefix": {
-      "type": "string", 
+      "type": "string",
       "title": "Greeting Prefix",
       "description": "Custom prefix for greeting messages",
       "default": "🚀 Greetings from the MCP Server Tool"

@@ -1,7 +1,7 @@
 {
   "dxt_version": "0.1",
   "name": "MCP Server Template",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A template for creating Model Context Protocol (MCP) servers as desktop extensions",
   "author": {
     "name": "Daniel Butler",
@@ -13,7 +13,7 @@
     "type": "python",
     "entry_point": "server/main.py",
     "mcp_config": {
-      "command": "${__dirname}/server/venv/bin/python",
+      "command": "python3",
       "args": ["${__dirname}/server/main.py"],
       "env": {
         "MCP_SERVER_NAME": "${config.serverName}",

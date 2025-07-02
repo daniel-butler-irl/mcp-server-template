@@ -1,0 +1,11 @@
+# Exclude test files and development dependencies
+tests/
+pytest.ini
+mcp-cli/
+.pre-commit-config.yaml
+
+# Exclude signing certificates (keep private!)
+cert.pem
+key.pem
+*.crt
+*.key
