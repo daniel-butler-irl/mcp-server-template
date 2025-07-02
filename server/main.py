@@ -1,12 +1,15 @@
 import os
+
 from mcp.server.fastmcp import FastMCP
-from tools.greeting import get_greeting
-from resources.status import get_server_status
 from prompts.templates import get_greeting_template
+from resources.status import get_server_status
+from tools.greeting import get_greeting
 
 # Configuration from environment variables
 SERVER_NAME = os.getenv("MCP_SERVER_NAME", "TemplateGreetingMCPServer")
-GREETING_PREFIX = os.getenv("MCP_GREETING_PREFIX", "🚀 Greetings from the MCP Server Tool")
+GREETING_PREFIX = os.getenv(
+    "MCP_GREETING_PREFIX", "🚀 Greetings from the MCP Server Tool"
+)
 
 mcp = FastMCP(SERVER_NAME)
 
@@ -30,32 +33,41 @@ async def hello(name: str) -> str:
     Returns:
         str: A unique greeting message that confirms MCP server tool usage.
     """
-    return await get_greeting(name, GREETING_PREFIX)
+    # Read the greeting prefix dynamically to support runtime environment changes
+    current_prefix = os.getenv(
+        "MCP_GREETING_PREFIX", "🚀 Greetings from the MCP Server Tool"
+    )
+    return await get_greeting(name, current_prefix)
 
 
 @mcp.resource("server://status")
 async def server_status() -> str:
     """
     Real-time MCP server status and health information.
-    
+
     This resource provides current operational status, uptime, and system health data.
-    Use this resource when users ask about: server status, health, uptime, or operational state.
-    
-    To access: Ask the user to request "read the server status resource" or guide them 
+    Use this resource when users ask about: server status, health, uptime, or
+    operational state.
+
+    To access: Ask the user to request "read the server status resource" or guide them
     to use CLI resource access commands.
     """
     status_info = await get_server_status()
-    return f"Server Status: {status_info['status']}\nTimestamp: {status_info['timestamp']}\nMessage: {status_info['message']}"
+    return (
+        f"Server Status: {status_info['status']}\n"
+        f"Timestamp: {status_info['timestamp']}\n"
+        f"Message: {status_info['message']}"
+    )
 
 
 @mcp.prompt()
 async def greeting_assistant() -> str:
     """
     Comprehensive assistant configuration for MCP server interactions.
-    
+
     This prompt template configures the assistant to understand all MCP capabilities:
     tools (callable functions), resources (accessible data), and prompts (templates).
-    
+
     Use this prompt to teach the assistant about proper MCP resource access patterns
     and how to guide users through the available server functionality.
     """

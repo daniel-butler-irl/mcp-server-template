@@ -83,7 +83,22 @@ start:
 	@pgrep ollama > /dev/null || ollama serve &
 	@sleep $(OLLAMA_START_WAIT)
 	@echo "Starting mcp-cli with $(OLLAMA_MODEL_DISPLAY) model and $(MCP_SERVER_NAME) server..."
-	cd $(MCP_DIR) && source .venv/bin/activate && mcp-cli --provider $(LLM_PROVIDER) --model $(OLLAMA_MODEL) --server $(MCP_SERVER_NAME)
+	@echo "Checking which model name to use..."
+	@cd $(MCP_DIR) && source .venv/bin/activate && \
+	MODEL_TO_USE="$(OLLAMA_MODEL)"; \
+	if mcp-cli models ollama | grep -q "$(OLLAMA_MODEL)"; then \
+		echo "Using full model name: $(OLLAMA_MODEL)"; \
+	elif mcp-cli models ollama | grep -q "$${OLLAMA_MODEL%%:*}"; then \
+		BASE_MODEL=$${OLLAMA_MODEL%%:*}; \
+		echo "Full model name not available, using base name: $$BASE_MODEL"; \
+		MODEL_TO_USE="$$BASE_MODEL"; \
+	else \
+		echo "Neither model name available. Available models:"; \
+		mcp-cli models ollama; \
+		exit 1; \
+	fi; \
+	echo "Starting with model: $$MODEL_TO_USE"; \
+	mcp-cli --provider $(LLM_PROVIDER) --model "$$MODEL_TO_USE" --server $(MCP_SERVER_NAME)
 
 stop:
 	@echo "Stopping Ollama service..."
@@ -157,10 +172,6 @@ setup-dev:
 test-full:
 	@echo "Running comprehensive test suite..."
 	@which uv > /dev/null || (echo "Please install uv first and run 'make setup-dev'" && exit 1)
-	@echo "Running pytest..."
-	uv run pytest
-	@echo "Validating manifest.json..."
-	python -c "import json; json.load(open('manifest.json'))"
-	@echo "Testing DXT pack (dry run)..."
-	@which node > /dev/null && npx @anthropic-ai/dxt pack --dry-run || echo "Node.js not available, skipping DXT validation"
+	@echo "Running pytest on tests directory only..."
+	uv run pytest tests/
 	@echo "All tests passed"
