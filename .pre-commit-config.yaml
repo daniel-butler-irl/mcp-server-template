@@ -33,7 +33,6 @@ repos:
     rev: v1.5.1
     hooks:
       - id: mypy
-        additional_dependencies: [fastmcp, mcp, pytest, pytest-asyncio]
         args: [--ignore-missing-imports]
 
   - repo: https://github.com/pre-commit/mirrors-autopep8
